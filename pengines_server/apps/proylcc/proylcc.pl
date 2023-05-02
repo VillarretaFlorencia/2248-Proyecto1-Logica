@@ -1,23 +1,16 @@
 :- module(proylcc, 
 	[  
+        columnas/6,
+        eliminar_ceros_y_contar/3,
+        completar_con_ceros/3,
+        armando/6,
+        positions_to_numbers/4,
+        sort/2,
+        replace_with_zeros/4,
+        cerosArriba/2,
+        enlistar/3,
 		join/4
 	]).
-
-
-/**
- * join(+Grid, +NumOfColumns, +Path, -RGrids) 
- * RGrids es la lista de grillas representando el efecto, en etapas, de combinar las celdas del camino Path
- * en la grilla Grid, con número de columnas NumOfColumns. El número 0 representa que la celda está vacía. 
- */ 
-
-join(Grid, _NumOfColumns, _Path, RGrids):-
-	Grid = [N | Ns],	% La implementación actual es simplemente a modo de muestra, y no tiene sentido, debe reepmplazarla
-	N2 is N * 2,		% por una implementación válida.
-	positions_to_numbers(NumOfColumns, Path, Posiciones, Ult),
-	sort(Posiciones, P),
-	replace_with_zeros(Ult, Grid, P, R),
-    cerosArriba(R, R2),
-	RGrids = [R, R2]. 
 
 positions_to_numbers(_,[], [], _).
 positions_to_numbers(C,[[X,Y]], [Result], Result) :- Result is X*C + Y.
@@ -186,3 +179,21 @@ cerosArriba(M,T):-
 	completar_con_ceros(N5,C5,Col5),
 	armando(Col1,Col2,Col3,Col4,Col5,T).
 
+enlistar(Lista1, Lista2, [Lista1, Lista2]).
+
+/**
+ * join(+Grid, +NumOfColumns, +Path, -RGrids) 
+ * RGrids es la lista de grillas representando el efecto, en etapas, de combinar las celdas del camino Path
+ * en la grilla Grid, con número de columnas NumOfColumns. El número 0 representa que la celda está vacía. 
+ */ 
+
+join(Grid, _NumOfColumns, _Path, RGrids):-
+    %Grid  = [N|Ns],
+    %N2 is N*2,
+	positions_to_numbers(NumOfColumns, Path, Posiciones, Ult),
+	sort(Posiciones, P),
+	replace_with_zeros(Ult, Grid, P, R),
+    cerosArriba(R, R2),
+    enlistar(R, R2, RGrids)
+    join(Grid, _NumOfColumns, _Path, RGrids).
+    %RGrids[[],[]]
