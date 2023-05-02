@@ -1,12 +1,15 @@
 :- module(proylcc, 
 	[  
         columnas/6,
+        columnas/7,
         eliminar_ceros_y_contar/3,
         completar_con_ceros/3,
         armando/6,
+        armando/7,
         positions_to_numbers/4,
         sort/2,
         replace_with_zeros/4,
+        replace_with_zeros/5,
         cerosArriba/2,
         enlistar/3,
 		join/4
@@ -147,7 +150,7 @@ join(Grid, _NumOfColumns, _Path, RGrids):-
     %N2 is N*2,
 	positions_to_numbers(NumOfColumns, Path, Posiciones, Ult),
 	sort(Posiciones, P),
-	replace_with_zeros(Ult, Grid, P, R),
+	replace_with_zeros(Ult, P, Grid, R),
     cerosArriba(R, R2),
     enlistar(R, R2, RGrids).
     %RGrids[Grid,[X|Xs]].
