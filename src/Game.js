@@ -49,8 +49,10 @@ function Game() {
    * Called when the user finished drawing a path in the grid.
    */
   function onPathDone() {
-    /*
-    Build Prolog query, which will be like:
+    
+    /**
+   *Build Prolog query, which will be like:
+  
     join([
           64,4,64,32,16,
           64,8,16,2,32,
@@ -64,8 +66,8 @@ function Game() {
           5, 
           [[2, 0], [3, 0], [4, 1], [3, 1], [2, 1], [1, 1], [1, 2], [0, 3]],
           RGrids
-        ).
-    */
+        );
+   */
     const gridS = JSON.stringify(grid);
     const pathS = JSON.stringify(path);
     const queryS = "join(" + gridS + "," + numOfColumns + "," + pathS + ", RGrids)";

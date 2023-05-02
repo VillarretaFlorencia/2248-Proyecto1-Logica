@@ -1,15 +1,16 @@
 :- module(proylcc, 
 	[  
+        
+        positions_to_numbers/4,
+        sort/2,
+        replace_with_zeros/4,
+        replace_with_zeros/5,
         columnas/6,
         columnas/7,
         eliminar_ceros_y_contar/3,
         completar_con_ceros/3,
         armando/6,
         armando/7,
-        positions_to_numbers/4,
-        sort/2,
-        replace_with_zeros/4,
-        replace_with_zeros/5,
         cerosArriba/2,
         enlistar/3,
 		join/4
@@ -145,7 +146,7 @@ enlistar(Lista1, Lista2, [Lista1, Lista2]).
  * en la grilla Grid, con número de columnas NumOfColumns. El número 0 representa que la celda está vacía. 
  */ 
 
-join(Grid, _NumOfColumns, _Path, RGrids):-
+join(Grid, NumOfColumns, Path, RGrids):-
     %Grid  = [N|Ns],
     %N2 is N*2,
 	positions_to_numbers(NumOfColumns, Path, Posiciones, Ult),
