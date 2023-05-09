@@ -11,8 +11,11 @@ function Game() {
   const [grid, setGrid] = useState(null);
   const [numOfColumns, setNumOfColumns] = useState(null);
   const [score, setScore] = useState(0);
+  const [scoreAct, setScoreAct] = useState(0);
   const [path, setPath] = useState([]);
   const [waiting, setWaiting] = useState(false);
+ // let cantPath = 0;
+  //let ultimoPunto = 0;
 
   useEffect(() => {
     // This is executed just once, after the first render.
@@ -43,6 +46,15 @@ function Game() {
     }
     setPath(newPath);
     console.log(JSON.stringify(newPath));
+    /*let aux = grid.get
+    if (path.length > cantPath){
+      setScoreAct(setScoreAct + newPath);
+    }
+    else if (path.length < cantPath){
+      setScoreAct(setScoreAct - ultimoPunto);
+    }
+    cantPath = path.length;
+    ultimoPunto = newPath;*/
   }
 
   /**
@@ -75,6 +87,7 @@ function Game() {
     pengine.query(queryS, (success, response) => {
       if (success) {
         setScore(score + joinResult(path, grid, numOfColumns));
+        setScoreAct(0);
         setPath([]);
         animateEffect(response['RGrids']);
       } else {
@@ -99,6 +112,20 @@ function Game() {
     }
   }
 
+  function handleClick() {
+    const gridS = JSON.stringify(grid);
+    const queryS = "booster(" + gridS + "," + numOfColumns + ", RGrids)";
+    setWaiting(true);
+    pengine.query(queryS, (success, response) => {
+      if (success) {
+        setPath([]);
+        animateEffect(response['RGrids']);
+      } else {
+        setWaiting(false);
+      }
+    });
+  }
+
   if (grid === null) {
     return null;
   }
@@ -106,6 +133,12 @@ function Game() {
     <div className="game">
       <div className="header">
         <div className="score">{score}</div>
+        <div className="score">{scoreAct}</div>
+      </div>       
+      <div>
+      <body>
+        <button id="booster" onClick={handleClick}>BOOSTER</button>
+      </body>
       </div>
       <Board
         grid={grid}
@@ -115,6 +148,7 @@ function Game() {
         onDone={onPathDone}
       />
     </div>
+    
   );
 }
 

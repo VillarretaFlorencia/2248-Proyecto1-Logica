@@ -20,7 +20,9 @@
         agrupar/7,
         colapsarIguales/3,
         colapsarIguales/6,
-		join/4
+        destruirGrupos/3,
+		join/4,
+        booster/3
 	]).
     /**
      * randomPotencia(Potencia) 
@@ -228,15 +230,34 @@
     enlistar(Lista1, Lista2, [Lista1, Lista2]).
 
 %------------------------------------------------
-    posicionesAdyacentes(Pos, Col, [Pos, DiagArI, Arr, DiagArD, Izq, Der, DiagAbI, Aba, DiagAbD]) :-
-        Arr is (Pos - Col),
-        Aba is (Pos + Col),
-        Der is (Pos + 1),
-        Izq is (Pos -1),
-        DiagArI is (Arr - 1),
-        DiagArD is (Arr + 1),
-        DiagAbI is (Aba - 1),
-        DiagAbD is (Aba + 1).
+posicionesAdyacentes(Pos, Col, P) :-
+    %Arr is (Pos - Col),
+    %Aba is (Pos + Col),
+    %Der is (Pos + 1),
+    %Izq is (Pos -1),
+    %DiagArI is (Arr - 1),
+    %DiagArD is (Arr + 1),
+    %DiagAbI is (Aba - 1),
+    %DiagAbD is (Aba + 1),		
+    X is Pos // Col,
+    Y is Pos - (X * Col),
+    Arriba is X-1,
+    Abajo is X+1,
+    Derecha is Y+1,
+    Izquierda is Y-1,
+    (X=:=0 -> PosArriba = [] ; PosArriba = [Arriba,Y]),
+    (X=:=8 -> PosAbajo = [] ; PosAbajo = [Abajo,Y]),
+    (Y=:=4 -> PosDerecha = [] ; PosDerecha = [X,Derecha]),
+    (Y=:=0 -> PosIzquierda = [] ; PosIzquierda = [X,Izquierda]),
+    ((X=:=0;Y=:=0) -> PosArrIz = [] ; PosArrIz = [Arriba,Izquierda]),
+    ((X=:=0;Y=:=4) -> PosArrDr = [] ; PosArrDr = [Arriba,Derecha]),
+    ((X=:=4;Y=:=0) -> PosAbjIz = [] ; PosAbjIz = [Abajo,Izquierda]),
+    ((X=:=4;Y=:=4) -> PosAbjDr = [] ; PosAbjDr = [Abajo,Derecha]),
+    findall(N, (
+        member(N, [[X,Y],PosArriba,PosAbajo,PosDerecha,PosIzquierda,PosArrIz,PosArrDr,PosAbjIz,PosAbjDr]),
+        dif(N,[]))
+    , Ady),
+    posiciones_a_indices(5,Ady,P,U).
 
     posicionValida(P, CS) :- P >= 0, P < CS.
 
@@ -261,7 +282,6 @@
     agrupar(M, C, N, [_|Pos],VisI, Vis, G) :- agrupar(M, C, N, Pos, VisI, Vis, G).
 
 
-
     colapsarIguales(M, C, G) :- colapsarIguales(M, M, C, [], G, 0). 
     colapsarIguales(_, [], _, _, [], _).
     colapsarIguales(M, [X|Ms], C, Vis, [G|Grupos], Pos) :-
@@ -275,7 +295,23 @@
     colapsarIguales(M, [_|Ms], C, Vis, Grupos, Pos) :- 
         Posicion is (Pos + 1),
         colapsarIguales(M, Ms, C, Vis, Grupos, Posicion).
-    
+
+    destruirGrupos(_,[],[]).
+    destruirGrupos(Grilla, [X|G], [Res|Resultado]) :-
+        length(X, Tam),
+    	Tam > 1,  
+    	I is Tam-1,
+        nth0(I, X, Ult),
+        reemplazar_por_ceros_y_ultimo(Ult, X, Grilla, R, Suma),
+    	potencia_dos(Suma, S),
+    	agregar_suma_ultimo(R,S,R1),
+        eliminando_bloques(R1, R2),
+    	%agregar(R1, Resultado, Res1),
+    	%agregar(R2, Res1, Result),
+    	enlistar(R1, R2, Res),
+        destruirGrupos(Grilla, G, Resultado).
+	destruirGrupos(Grilla, [_|G], Resultado) :- destruirGrupos(Grilla, G, Resultado).
+
     
     /**
      * join(+Grid, +NumOfColumns, +Path, -RGrids) 
@@ -294,3 +330,7 @@
         eliminando_bloques(R1, R2),
         enlistar(R1, R2, RGrids).
         %RGrids[Grid,[X|Xs]].
+    
+    booster(Grid, NumOfColumns, RGrids) :-
+        colapsarIguales(Grid, NumOfColumns, G),
+        destruirGrupos(Grid, G, RGrids).
