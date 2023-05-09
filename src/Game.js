@@ -132,11 +132,9 @@ function Game() {
   return (
     <div className="game">
       <div className="header">
-       
-        
-        <div className={isActive ? 'squareScore' : 'score'}>
+      <div className={isActive ? 'squareScore' : 'score'}>
           {displayValue}
-        </div>
+      </div>
        
       </div>       
       <div>

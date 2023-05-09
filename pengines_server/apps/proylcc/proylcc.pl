@@ -251,8 +251,8 @@ posicionesAdyacentes(Pos, Col, P) :-
     (Y=:=0 -> PosIzquierda = [] ; PosIzquierda = [X,Izquierda]),
     ((X=:=0;Y=:=0) -> PosArrIz = [] ; PosArrIz = [Arriba,Izquierda]),
     ((X=:=0;Y=:=4) -> PosArrDr = [] ; PosArrDr = [Arriba,Derecha]),
-    ((X=:=4;Y=:=0) -> PosAbjIz = [] ; PosAbjIz = [Abajo,Izquierda]),
-    ((X=:=4;Y=:=4) -> PosAbjDr = [] ; PosAbjDr = [Abajo,Derecha]),
+    ((X=:=8;Y=:=0) -> PosAbjIz = [] ; PosAbjIz = [Abajo,Izquierda]),
+    ((X=:=8;Y=:=4) -> PosAbjDr = [] ; PosAbjDr = [Abajo,Derecha]),
     findall(N, (
         member(N, [[X,Y],PosArriba,PosAbajo,PosDerecha,PosIzquierda,PosArrIz,PosArrDr,PosAbjIz,PosAbjDr]),
         dif(N,[]))
@@ -309,7 +309,7 @@ posicionesAdyacentes(Pos, Col, P) :-
     	%agregar(R1, Resultado, Res1),
     	%agregar(R2, Res1, Result),
     	%enlistar(R1, R2, Res),
-        destruirGrupos(Grilla, G, Resultado).
+        destruirGrupos(R2, G, Resultado).
 	destruirGrupos(Grilla, [_|G], Resultado) :- destruirGrupos(Grilla, G, Resultado).
     
 
