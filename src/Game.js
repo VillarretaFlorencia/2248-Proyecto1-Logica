@@ -11,11 +11,18 @@ function Game() {
   const [grid, setGrid] = useState(null);
   const [numOfColumns, setNumOfColumns] = useState(null);
   const [score, setScore] = useState(0);
-  const [scoreAct, setScoreAct] = useState(0);
   const [path, setPath] = useState([]);
   const [waiting, setWaiting] = useState(false);
- // let cantPath = 0;
-  //let ultimoPunto = 0;
+  //Si se esta haciendo un path (Se usa para el valor) 
+  const [valorPath, setValorPath] = useState(0);
+  const [isActive, setIsActive] = useState(false);
+  useEffect(() => {
+    // This is executed just once, after the first render.
+    PengineClient.init(onServerReady);
+  }, []);
+
+  //Usado para display del path
+  const displayValue = isActive ? valorPath : score;
 
   useEffect(() => {
     // This is executed just once, after the first render.
@@ -46,15 +53,8 @@ function Game() {
     }
     setPath(newPath);
     console.log(JSON.stringify(newPath));
-    /*let aux = grid.get
-    if (path.length > cantPath){
-      setScoreAct(setScoreAct + newPath);
-    }
-    else if (path.length < cantPath){
-      setScoreAct(setScoreAct - ultimoPunto);
-    }
-    cantPath = path.length;
-    ultimoPunto = newPath;*/
+    setIsActive(true); //Cambia el valor en el return
+    setValorPath(joinResult(newPath, grid, numOfColumns));
   }
 
   /**
@@ -84,10 +84,10 @@ function Game() {
     const pathS = JSON.stringify(path);
     const queryS = "join(" + gridS + "," + numOfColumns + "," + pathS + ", RGrids)";
     setWaiting(true);
+    setIsActive(false);
     pengine.query(queryS, (success, response) => {
       if (success) {
         setScore(score + joinResult(path, grid, numOfColumns));
-        setScoreAct(0);
         setPath([]);
         animateEffect(response['RGrids']);
       } else {
@@ -132,8 +132,12 @@ function Game() {
   return (
     <div className="game">
       <div className="header">
-        <div className="score">{score}</div>
-        <div className="score">{scoreAct}</div>
+       
+        
+        <div className={isActive ? 'squareScore' : 'score'}>
+          {displayValue}
+        </div>
+       
       </div>       
       <div>
       <body>

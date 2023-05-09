@@ -297,7 +297,7 @@ posicionesAdyacentes(Pos, Col, P) :-
         colapsarIguales(M, Ms, C, Vis, Grupos, Posicion).
 
     destruirGrupos(_,[],[]).
-    destruirGrupos(Grilla, [X|G], [Res|Resultado]) :-
+    destruirGrupos(Grilla, [X|G], [R2|Resultado]) :-
         length(X, Tam),
     	Tam > 1,  
     	I is Tam-1,
@@ -308,9 +308,10 @@ posicionesAdyacentes(Pos, Col, P) :-
         eliminando_bloques(R1, R2),
     	%agregar(R1, Resultado, Res1),
     	%agregar(R2, Res1, Result),
-    	enlistar(R1, R2, Res),
+    	%enlistar(R1, R2, Res),
         destruirGrupos(Grilla, G, Resultado).
 	destruirGrupos(Grilla, [_|G], Resultado) :- destruirGrupos(Grilla, G, Resultado).
+    
 
     
     /**
