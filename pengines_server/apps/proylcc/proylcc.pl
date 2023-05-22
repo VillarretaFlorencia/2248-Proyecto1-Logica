@@ -245,49 +245,45 @@ posicionesAdyacentes(Pos, Col, P) :-
     Abajo is X+1,
     Derecha is Y+1,
     Izquierda is Y-1,
+
     (X=:=0 -> PosArriba = [] ; PosArriba = [Arriba,Y]),
-    (X=:=8 -> PosAbajo = [] ; PosAbajo = [Abajo,Y]),
+    (X=:=7 -> PosAbajo = [] ; PosAbajo = [Abajo,Y]),
     (Y=:=4 -> PosDerecha = [] ; PosDerecha = [X,Derecha]),
     (Y=:=0 -> PosIzquierda = [] ; PosIzquierda = [X,Izquierda]),
     ((X=:=0;Y=:=0) -> PosArrIz = [] ; PosArrIz = [Arriba,Izquierda]),
     ((X=:=0;Y=:=4) -> PosArrDr = [] ; PosArrDr = [Arriba,Derecha]),
-    ((X=:=8;Y=:=0) -> PosAbjIz = [] ; PosAbjIz = [Abajo,Izquierda]),
-    ((X=:=8;Y=:=4) -> PosAbjDr = [] ; PosAbjDr = [Abajo,Derecha]),
+    ((X=:=7;Y=:=0) -> PosAbjIz = [] ; PosAbjIz = [Abajo,Izquierda]),
+    ((X=:=7;Y=:=4) -> PosAbjDr = [] ; PosAbjDr = [Abajo,Derecha]),
     findall(N, (
-        member(N, [[X,Y],PosArriba,PosAbajo,PosDerecha,PosIzquierda,PosArrIz,PosArrDr,PosAbjIz,PosAbjDr]),
+        member(N, [[X,Y],PosArrIz,PosArriba,PosArrDr,PosDerecha,PosAbjDr,PosAbajo,PosAbjIz,PosIzquierda]),
         dif(N,[]))
     , Ady),
-    posiciones_a_indices(5,Ady,P,U).
+    posiciones_a_indices(5,Ady,P,_).
 
     posicionValida(P, CS) :- P >= 0, P < CS.
 
-    agrupar(_, _, _, [], _, _,[]).
-    agrupar(M, C, N, [P|Pos], VisI, Vis, [P|G]) :-
+    agrupar(_, _, _, [], VisI, VisI, []).
+    agrupar(M, C, N, [P|Pos], VisI, V, NewG) :-
         not(member(P,VisI)),
         append(VisI, [P], NewVisI),
-        length(M, Sup),
-        posicionValida(P, Sup),
-        not(member(P,Vis)),
-        append(Vis, [P], NewVis), 
-        nth0(P, M, Num),
-        N =:= Num,
+        nth0(P, M, N),
         posicionesAdyacentes(P, C, NPos),
-        agrupar(M, C, N, NPos, NewVisI, NewVis, G),
-        agrupar(M, C, N, Pos, NewVisI, NewVis, G).
-        
-    agrupar(M, C, N, [P|Pos], VisI, Vis, G) :- 
+    	!,
+    	agrupar(M, C, N, NPos, NewVisI, VisIAux, G1),
+    	agrupar(M, C, N, Pos,  VisIAux, V, G2),
+        append([P|G1], G2, NewG).
+    agrupar(M, C, N, [P|Pos], VisI, V, G) :- 
         not(member(P,VisI)),
         append(VisI, [P], NewVisI),
-        agrupar(M, C, N, Pos,  NewVisI, Vis, G).
-    agrupar(M, C, N, [_|Pos],VisI, Vis, G) :- agrupar(M, C, N, Pos, VisI, Vis, G).
+        agrupar(M, C, N, Pos,  NewVisI, V, G).
+    agrupar(M, C, N, [_|Pos],VisI, VisIAux, G) :- agrupar(M, C, N, Pos, VisI, VisIAux, G).
 
 
     colapsarIguales(M, C, G) :- colapsarIguales(M, M, C, [], G, 0). 
     colapsarIguales(_, [], _, _, [], _).
     colapsarIguales(M, [X|Ms], C, Vis, [G|Grupos], Pos) :-
         not(member(Pos, Vis)),
-        posicionesAdyacentes(Pos, C, Ady),
-        agrupar(M, C, X, Ady, [], Vis, G),
+        agrupar(M, C, X, [Pos], [], _, G),
         append(Vis, G, NewVista),
         Posicion is (Pos + 1), 
         colapsarIguales(M, Ms, C, NewVista, Grupos, Posicion).
