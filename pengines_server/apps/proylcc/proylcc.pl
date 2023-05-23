@@ -292,21 +292,22 @@ posicionesAdyacentes(Pos, Col, P) :-
         Posicion is (Pos + 1),
         colapsarIguales(M, Ms, C, Vis, Grupos, Posicion).
 
-    destruirGrupos(_,[],[]).
-    destruirGrupos(Grilla, [X|G], [R2|Resultado]) :-
+    destruirGrupos(_, [], []).
+    destruirGrupos(Grilla, [X|G], [R1|Resultado1]) :-
         length(X, Tam),
     	Tam > 1,  
     	I is Tam-1,
         nth0(I, X, Ult),
-        reemplazar_por_ceros_y_ultimo(Ult, X, Grilla, R, Suma),
+    	sort(X, Xs),
+        reemplazar_por_ceros_y_ultimo(Ult, Xs, Grilla, R, Suma),
     	potencia_dos(Suma, S),
     	agregar_suma_ultimo(R,S,R1),
-        eliminando_bloques(R1, R2),
+        %eliminando_bloques(R1, R2),
     	%agregar(R1, Resultado, Res1),
     	%agregar(R2, Res1, Result),
     	%enlistar(R1, R2, Res),
-        destruirGrupos(R2, G, Resultado).
-	destruirGrupos(Grilla, [_|G], Resultado) :- destruirGrupos(Grilla, G, Resultado).
+        destruirGrupos(R1, G, Resultado1).
+	destruirGrupos(Grilla, [_|G], Resultado1) :- destruirGrupos(Grilla, G, Resultado1).
     
 
     
@@ -330,4 +331,9 @@ posicionesAdyacentes(Pos, Col, P) :-
     
     booster(Grid, NumOfColumns, RGrids) :-
         colapsarIguales(Grid, NumOfColumns, G),
-        destruirGrupos(Grid, G, RGrids).
+        destruirGrupos(Grid, G, R),
+    	length(R, Tam),
+    	I is Tam-1,
+        nth0(I, R, Ult),
+    	eliminando_bloques(Ult, Result),
+    	enlistar(Ult,Result,RGrids).
