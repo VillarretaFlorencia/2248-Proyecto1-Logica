@@ -4,8 +4,13 @@ export function numberToColor(num) {
         case 4: return "#ec893b";
         case 8: return "#e35b89";
         case 16: return "#af4e7a";
-        case 32: return "#a63e4a";
+        case 32: return "#f7eb2d";
         case 64: return "#8d6ebc";
+        case 128: return "#85eded";
+        case 256: return "#f071e9";
+        case 512: return "#5af74f";
+        case 1024: return "#ab2dfa";
+        case 2048: return "#fa712d";
         default: return "black";
     }
 }

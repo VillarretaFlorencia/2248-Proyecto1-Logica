@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PengineClient from './PengineClient';
 import Board from './Board';
 import { joinResult } from './util';
+import Square from './Square';
 
 let pengine;
 
@@ -15,14 +16,11 @@ function Game() {
   const [waiting, setWaiting] = useState(false);
   //Si se esta haciendo un path (Se usa para el valor) 
   const [valorPath, setValorPath] = useState(0);
-  const [isActive, setIsActive] = useState(false);
   useEffect(() => {
     // This is executed just once, after the first render.
     PengineClient.init(onServerReady);
   }, []);
 
-  //Usado para display del path
-  const displayValue = isActive ? valorPath : score;
 
   useEffect(() => {
     // This is executed just once, after the first render.
@@ -53,7 +51,6 @@ function Game() {
     }
     setPath(newPath);
     console.log(JSON.stringify(newPath));
-    setIsActive(true); //Cambia el valor en el return
     setValorPath(joinResult(newPath, grid, numOfColumns));
   }
 
@@ -83,8 +80,8 @@ function Game() {
     const gridS = JSON.stringify(grid);
     const pathS = JSON.stringify(path);
     const queryS = "join(" + gridS + "," + numOfColumns + "," + pathS + ", RGrids)";
+    setValorPath(0);
     setWaiting(true);
-    setIsActive(false);
     pengine.query(queryS, (success, response) => {
       if (success) {
         setScore(score + joinResult(path, grid, numOfColumns));
@@ -115,6 +112,7 @@ function Game() {
   function handleClick() {
     const gridS = JSON.stringify(grid);
     const queryS = "booster(" + gridS + "," + numOfColumns + ", RGrids)";
+    setValorPath(0);
     setWaiting(true);
     pengine.query(queryS, (success, response) => {
       if (success) {
@@ -130,17 +128,17 @@ function Game() {
     return null;
   }
   return (
-    <div className="game">
-      <div className="header">
-      <div className={isActive ? 'squareScore' : 'score'}>
-          {displayValue}
-      </div>
-       
-      </div>       
+      <div className="game">
+        <div className="header">
+          <div className="score">{score}</div>
+          <Square value={valorPath}/>
+        </div>       
       <div>
+      
       <body>
         <button id="booster" onClick={handleClick}>BOOSTER</button>
       </body>
+      
       </div>
       <Board
         grid={grid}

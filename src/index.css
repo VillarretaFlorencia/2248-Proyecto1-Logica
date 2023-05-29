@@ -33,7 +33,7 @@ body {
   display: grid;  
 }
 
-.square {
+.square{
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,4 +95,15 @@ body {
 
 .connectorLine.backslash {
   transform: rotate(45deg);
+}
+
+/* Estilos para el botón */
+#booster {
+  border-radius: 20px;
+  background-color: blue;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: 4px solid fuchsia;
 }
