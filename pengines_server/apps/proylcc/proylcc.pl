@@ -1,44 +1,40 @@
 :- module(proylcc, 
 	[  
-        randomPotencia/3,
+        random_potencia/3,
         potencia_dos/2,
         posiciones_a_indices/4,
         sort/2,
         reemplazar_por_ceros_y_ultimo/5,
         reemplazar_por_ceros_y_ultimo/6,
         agregar_suma_ultimo/3,
-        enColumnas/3,
-        enColumnas/4,
-        columna/4,
-        columnas/6,
-        columnas/7,
+        en_columnas/3,
+        en_columnas/4,
         eliminar_ceros_y_contar/3,
         completar_con_randoms/3,
-        enFilas/2,
-        sacarPrimerElem/3,
-        armando_grilla/6,
-        armando_grilla/7,
+        en_filas/2,
+        sacar_primer_elem/3,
         eliminando_bloques/3,
         eliminando_bloques/2,
         enlistar/3,
-        posicionesAdyacentes/3,
+        posiciones_adyacentes/4,
         posicionValida/2,
-        agrupar/7,
-        colapsarIguales/3,
-        colapsarIguales/6,
-        destruirGrupos/3,
+        agrupar/8,
+        colapsar_iguales/4,
+        colapsar_iguales/7,
+        destruir_grupos/3,
 		join/4,
         booster/3
 	]).
-  /**
-     * randomPotencia(Potencia) 
+  
+    /**
+     * random_potencia(+CI,+CS,-Potencia) 
      * CI es la cota inferior, CS es la cota uperior, y Potencia es un numero random entre CI y CS.
      */ 
-    randomPotencia(CI,CS,Potencia) :-
+    random_potencia(CI,CS,Potencia) :-
         random(CI, CS, Potencia).
     
     /**
-     * potencia_dos(N, Potencia)
+     * potencia_dos(+N, -Potencia)
      * N es un numero dado y Potencia es la menor potencia de 2 mayoro igual que N.
      */ 
     potencia_dos(N, Potencia) :-
@@ -46,7 +42,7 @@
     
 
     /**
-     * posiciones_a_indices(C, Posiciones, Indices, Ultimo).
+     * posiciones_a_indices(+C, +Posiciones, -Indices, -Ultimo).
      * C es la cantidad de Columnas, Posiciones es una lista de posiciones [X,Y],
      * Indices es la lista de salida que contiene las posiciones convertidas a indices, 
      * Ultimo es el ultimo elemento de la lista Posiciones.
@@ -58,7 +54,7 @@
         posiciones_a_indices(C, Posiciones, Indices, Ultimo).
 
     /**
-     * reemplazar_por_ceros_y_ultimo(U, P, L, Result, Index, S) 
+     * reemplazar_por_ceros_y_ultimo(+U, +P, +L, -Result, +Index, -S) 
      * U es el ultimo elemento de la lista P.
      * P es la lista de indices,
      * L es la lista Matriz,
@@ -93,7 +89,7 @@
     
 
      /**
-     * agregar_suma_ultimo(G, Suma, Resultado)
+     * agregar_suma_ultimo(+G, +Suma, -Resultado)
      * G es la lista Matriz,
      * Suma es la suma del camino.
      * Resultado es la lista resultante reemplazando el ultimo elemento del camino por la suma del mismo.
@@ -106,21 +102,28 @@
         agregar_suma_ultimo(G, Suma, Resultado).
     
     
-    %------Parte 2------
+    
      /**
-     * enColumnas(G,Columnas,Res,Pos)
-     * G es la lista Matriz,
-     * Columnas es la cantidad de columnas que componen la Matriz
-     * os es el indice del elemento actual,
+     * en_columnas(+G,+Columnas,-Res,+Pos)
+     * G es la lista Matriz a trasponer,
+     * Columnas es la cantidad de columnas que componen la Matriz,
+     * Pos es el indice del elemento actual,
      * Res es una lista de listas donde cada una es una columna de la  Matriz.
      */ 
-    enColumnas(G,Columnas, Res) :- enColumnas(G,Columnas,Res,0).
-    enColumnas(_,Columnas,[],Columnas).
-    enColumnas(G,Columnas,[C|Res],Pos) :- 
+    en_columnas(G,Columnas, Res) :- en_columnas(G,Columnas,Res,0).
+    en_columnas(_,Columnas,[],Columnas).
+    en_columnas(G,Columnas,[C|Res],Pos) :- 
         columna(G,Pos,Columnas,C),
         Posicion is (Pos+1),
-        enColumnas(G,Columnas,Res,Posicion).
+        en_columnas(G,Columnas,Res,Posicion).
 
+    /**
+     * columna(+G,+N,+Columnas,-Resultado)
+     * G es la lista Matriz,
+     * N es la posicion actual desde donde se desea obtener la columna,
+     * Columnas es la cantidad de columnas que componen la Matriz,
+     * Resultado es una lista que contiene una columna de la  Matriz.
+     */ 
     columna(G,N,_,[]) :- 
         length(G,Tam),
         N>=Tam.
@@ -131,7 +134,7 @@
 
      
     /**
-     * eliminar_ceros_y_contar(L, Resultado, Contador)
+     * eliminar_ceros_y_contar(+L, -Resultado, -Contador)
      * G es una lista,
      * Resultado es la lista sin 0
      * Contador es la cantidad de 0 que se eliminaron de la lista.
@@ -146,7 +149,7 @@
     
    
      /**
-     * completar_con_randoms(N,L,Resultado)
+     * completar_con_randoms(+N,+L,-Resultado)
      * N es la cantidad de numeros randoms a agregar
      * L es la lista a modificar
      * Resultado es una lista con los N numero randoms seguidos de la lista L
@@ -154,31 +157,39 @@
     completar_con_randoms(0,L,L). % Caso Base: si N es 0 entonces Resultado es L
     completar_con_randoms(N,L,[Result|Resultado]) :- 
         % Caso Rescursivo: agrego un random a la lista Resultado y disminuye la cantidad de randoms a agregar
-        randomPotencia(1,6,Potencia),
+        random_potencia(1,6,Potencia),
         Result is (2 ** Potencia),
         Cont is (N-1),
         completar_con_randoms(Cont,L,Resultado).
 
      /**
-     * armando_grilla(Index,C1,C2,C3,C4,C5,G)
-     * C1,C2,C3,C4,C5 son listas donde cada una es una columna de la Matriz a armar,
-     * Index es el indice del elemento actual,
-     * G es la lista Matriz resultate compuesta por las 5 columna de entrada.
+     * en_filas(+M, +Maux, +R, -Resultado) 
+     * M es una lista de listas que representa una Matriz.
+     * M aux son las listas sin su primer elemento en cada iteracion.
+     * R es una lista de entrada donde se actualiza la lista Matriz resultate.
+     * Resultado es una lista de salida que representa la Matriz traspuesta de la que 
+     * componen las listas de la lista de entada M.
      */     
-    enFilas(M, Resultado):- enFilas(M, [], [],Resultado).
-    enFilas([],[],R,R).
-    enFilas([],Maux,R,Resultado) :- enFilas(Maux,[],R,Resultado).
-    enFilas([X|M], Maux, R, Resultado) :-
-        sacarPrimerElem(X,E,Res),
+    en_filas(M, Resultado):- en_filas(M, [], [],Resultado).
+    en_filas([],[],R,R).
+    en_filas([],Maux,R,Resultado) :- en_filas(Maux,[],R,Resultado).
+    en_filas([X|M], Maux, R, Resultado) :-
+        sacar_primer_elem(X,E,Res),
         append(R,[E],NR),
         (Res \= [] -> append(Maux,[Res],NMaux); NMaux=Maux),
-        enFilas(M, NMaux, NR, Resultado).
-        
-    sacarPrimerElem([],_,[]).
-    sacarPrimerElem([E|L],E,L).
+        en_filas(M, NMaux, NR, Resultado).
+
+     /**
+     * sacar_primer_elem(+L,-E,-Resto)
+     * L lista de entrada.
+     * E primer elemento de la lista.
+     * Resto lo que queda en la lista sin su primer elemento.
+     */      
+    sacar_primer_elem([],_,[]).
+    sacar_primer_elem([E|L],E,L).
     
     /**
-     * eliminar(M,T)
+     * eliminar(+M,-T)
      * M es una lista de listas donde cada una es una columna de una Matriz.
      * T es una lista de listas donde cada una es una columna de una Matriz 
      * con los nuevos randoms sobre los bloques eliminados (efecto gravedad).
@@ -186,78 +197,119 @@
     eliminar([],[]).
     eliminar([X|M],[CR|T]):-
     eliminar_ceros_y_contar(X, SC, Cont),
-    completar_con_randoms(Cont,SC,CR),
-    eliminar(M,T).
+        completar_con_randoms(Cont,SC,CR),
+        eliminar(M,T).
 
     /**
-    * eliminando_bloques(M,T)
-    * M es la lista Matriz de entrada.
-    * T es la lista Matriz con los nuevos randoms sobre los bloques eliminados.
+    * eliminando_bloques(+M,+Columnas,-T)
+    * M es la lista Matriz de entrada,
+    * Columnas cantidad de columnas de M
+    * T es la lista Matriz con los nuevos randoms sobre los bloques eliminados,
     */ 
     eliminando_bloques(M,Columnas,T):-
-    enColumnas(M,Columnas,Res),
-    eliminar(Res,MCR),
-    enFilas(MCR,T).
+        en_columnas(M,Columnas,Res),
+        eliminar(Res,MCR),
+        en_filas(MCR,T).
     
+    /**
+    * enlistar(+Lista1, +Lista2, -Resultado)
+    * Lista1, Lista2, dos listas,
+    * Resultado una lista compuesta con las dos listas de entrada.
+    */ 
     enlistar(Lista1, Lista2, [Lista1, Lista2]).
 
 %------------------------------------------------
-posicionesAdyacentes(Pos, Col, P) :-
+/**
+    * posiciones_adyacentes(+Pos, +Col, +F, -P)
+    * Pos es una posicion,
+    * Col es la cantidad de columnas,
+    * F es la cantidad de filas,
+    * P es una lista con las posiciones adyacentes validas.
+    */ 
+posiciones_adyacentes(Pos, Col, F, P) :-
     X is Pos // Col,
     Y is Pos - (X * Col),
     Arriba is X-1,
     Abajo is X+1,
     Derecha is Y+1,
     Izquierda is Y-1,
-
+	LC is Col-1, %limite Columnas
+	LF is F-1, %limete Filas
     (X=:=0 -> PosArriba = [] ; PosArriba = [Arriba,Y]),
-    (X=:=7 -> PosAbajo = [] ; PosAbajo = [Abajo,Y]),
-    (Y=:=4 -> PosDerecha = [] ; PosDerecha = [X,Derecha]),
+    (X=:=LF -> PosAbajo = [] ; PosAbajo = [Abajo,Y]),
+    (Y=:=LC -> PosDerecha = [] ; PosDerecha = [X,Derecha]),
     (Y=:=0 -> PosIzquierda = [] ; PosIzquierda = [X,Izquierda]),
     ((X=:=0;Y=:=0) -> PosArrIz = [] ; PosArrIz = [Arriba,Izquierda]),
-    ((X=:=0;Y=:=4) -> PosArrDr = [] ; PosArrDr = [Arriba,Derecha]),
-    ((X=:=7;Y=:=0) -> PosAbjIz = [] ; PosAbjIz = [Abajo,Izquierda]),
-    ((X=:=7;Y=:=4) -> PosAbjDr = [] ; PosAbjDr = [Abajo,Derecha]),
+    ((X=:=0;Y=:=LC) -> PosArrDr = [] ; PosArrDr = [Arriba,Derecha]),
+    ((X=:=LF;Y=:=0) -> PosAbjIz = [] ; PosAbjIz = [Abajo,Izquierda]),
+    ((X=:=LF;Y=:=LC) -> PosAbjDr = [] ; PosAbjDr = [Abajo,Derecha]),
     findall(N, (
         member(N, [PosArrIz,PosArriba,PosArrDr,PosIzquierda,PosDerecha,PosAbjIz,PosAbajo,PosAbjDr]),
         dif(N,[]))
     , Ady),
-    posiciones_a_indices(5,Ady,P,_).
+    posiciones_a_indices(Col,Ady,P,_).
 
-    posicionValida(P, CS) :- P >= 0, P < CS.
-
-    agrupar(_, _, _, [], VisI, VisI, []).
-    agrupar(M, C, N, [P|Pos], VisI, V, NewG) :-
+/**
+    *  agrupar(+M, +C, +F, +N, +Pos, +VisI, +V, -G)
+    * M es una Matriz,
+    * C es la cantidad de columnas,
+    * F es la cantidad de filas,
+    * N es el numero que se encuentra en la Matriz en la Posicion P,
+    * P es una lista con las posiciones adyacentes validas,
+    * VisI es la lista de visitados internos,
+    * V es la lista de visitados generales,
+    * G es la lista con las posiciones que componen el grupo formado por las posiciones adyacentes que
+    * tienen el mismo N.
+    */ 
+    agrupar(_, _, _, _, [], VisI, VisI, []).
+    agrupar(M, C, F, N, [P|Pos], VisI, V, NewG) :-
         not(member(P,VisI)),
         append(VisI, [P], NewVisI),
         nth0(P, M, N),
-        posicionesAdyacentes(P, C, NPos),
+        posiciones_adyacentes(P, C, F, NPos),
     	!,
-    	agrupar(M, C, N, NPos, NewVisI, VisIAux, G1),
-    	agrupar(M, C, N, Pos,  VisIAux, V, G2),
+    	agrupar(M, C, F, N, NPos, NewVisI, VisIAux, G1),
+    	agrupar(M, C, F, N, Pos,  VisIAux, V, G2),
         append([P|G1], G2, NewG).
-    agrupar(M, C, N, [P|Pos], VisI, V, G) :- 
+    agrupar(M, C, F, N, [P|Pos], VisI, V, G) :- 
         not(member(P,VisI)),
         append(VisI, [P], NewVisI),
-        agrupar(M, C, N, Pos,  NewVisI, V, G).
-    agrupar(M, C, N, [_|Pos],VisI, VisIAux, G) :- agrupar(M, C, N, Pos, VisI, VisIAux, G).
+        agrupar(M, C, F, N, Pos,  NewVisI, V, G).
+    agrupar(M, C, F, N, [_|Pos],VisI, VisIAux, G) :- agrupar(M, C, F, N, Pos, VisI, VisIAux, G).
 
-
-    colapsarIguales(M, C, G) :- colapsarIguales(M, M, C, [], G, 0). 
-    colapsarIguales(_, [], _, _, [], _).
-    colapsarIguales(M, [X|Ms], C, Vis, [G|Grupos], Pos) :-
+    /**
+    * colapsar_iguales(+M, +Maux, +C, +F, +Vis, -G, +Pos)
+    * M es una Matriz,
+    * Maux es la Matriz qu se va visitando,
+    * C es la cantidad de columnas,
+    * F es la cantidad de filas,
+    * Vis es la lista de visitados generales,
+    * G es la lista con los grupos, donde cada grupo esta formado por las posiciones adyacentes que
+    * tienen el mismo numero,
+    * Pos es la posicion actual.
+    */ 
+    colapsar_iguales(M, C, F, G) :- colapsar_iguales(M, M, C, F, [], G, 0). 
+    colapsar_iguales(_, [], _, _, _, [], _).
+    colapsar_iguales(M, [X|Ms], C, F, Vis, [G|Grupos], Pos) :-
         not(member(Pos, Vis)),
-        agrupar(M, C, X, [Pos], [], _, G),
+        agrupar(M, C, F, X, [Pos], [], _, G),
         append(Vis, G, NewVista),
         Posicion is (Pos + 1), 
-        colapsarIguales(M, Ms, C, NewVista, Grupos, Posicion).
+        colapsar_iguales(M, Ms, C, F, NewVista, Grupos, Posicion).
     
-    colapsarIguales(M, [_|Ms], C, Vis, Grupos, Pos) :- 
+    colapsar_iguales(M, [_|Ms], C, F, Vis, Grupos, Pos) :- 
         Posicion is (Pos + 1),
-        colapsarIguales(M, Ms, C, Vis, Grupos, Posicion).
+        colapsar_iguales(M, Ms, C, F, Vis, Grupos, Posicion).
 
-    destruirGrupos(_, [], []).
-    destruirGrupos(Grilla, [X|G], [R1|Resultado1]) :-
+ /**
+    * destruir_grupos(+Grilla, +G, -Resultado)
+    * Grilla es una Matriz,
+    * G es la Matriz que se va visitando,
+    * Resultado es una lista con listas donde cada una representa la Matriz con 0's en los bloques a eliminar
+    * y la suma donde termina el grupo.
+    */ 
+    destruir_grupos(_, [], []).
+    destruir_grupos(Grilla, [X|G], [R1|Resultado]) :-
         length(X, Tam),
     	Tam > 1,  
     	I is Tam-1,
@@ -266,8 +318,8 @@ posicionesAdyacentes(Pos, Col, P) :-
         reemplazar_por_ceros_y_ultimo(Ult, Xs, Grilla, R, Suma),
     	potencia_dos(Suma, S),
     	agregar_suma_ultimo(R,S,R1),
-        destruirGrupos(R1, G, Resultado1).
-	destruirGrupos(Grilla, [_|G], Resultado1) :- destruirGrupos(Grilla, G, Resultado1).
+        destruir_grupos(R1, G, Resultado).
+	destruir_grupos(Grilla, [_|G], Resultado) :- destruir_grupos(Grilla, G, Resultado).
     
     
     /**
@@ -285,9 +337,17 @@ posicionesAdyacentes(Pos, Col, P) :-
         eliminando_bloques(R1,NumOfColumns, R2),
         enlistar(R1, R2, RGrids).
     
+     /**
+     * booster(+Grid, +NumOfColumns, +Path, -RGrids) 
+     * RGrids es la lista de grillas representando el efecto, en etapas, de e eliminar los grupos de bloques 
+     * adyacentes que comparten el mismo numero, en la grilla Grid, con número de columnas NumOfColumns. 
+     * El número 0 representa que la celda está vacía. 
+     */ 
     booster(Grid, NumOfColumns, RGrids) :-
-        colapsarIguales(Grid, NumOfColumns, G),
-        destruirGrupos(Grid, G, R),
+    	length(Grid, T),
+    	Filas is (T//NumOfColumns),
+        colapsar_iguales(Grid, NumOfColumns, Filas, G),
+        destruir_grupos(Grid, G, R),
     	length(R, Tam),
     	I is Tam-1,
         nth0(I, R, Ult),
