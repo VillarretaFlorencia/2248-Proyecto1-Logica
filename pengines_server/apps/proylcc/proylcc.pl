@@ -351,4 +351,4 @@
             I is Tam-1,
             nth0(I, R, Ult),
             eliminando_bloques(Ult,NumOfColumns, Result),
-            enlistar(Ult,Result,RGrids).
+            append(R, [Result],RGrids).
