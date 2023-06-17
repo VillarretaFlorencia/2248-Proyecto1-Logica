@@ -109,7 +109,7 @@ function Game() {
     }
   }
 
-  function handleClick() {
+  function ejecutarBooster(){
     const gridS = JSON.stringify(grid);
     const queryS = "booster(" + gridS + "," + numOfColumns + ", RGrids)";
     setValorPath(0);
@@ -122,6 +122,26 @@ function Game() {
         setWaiting(false);
       }
     });
+  }
+ 
+
+  function handleClick() {
+    deshabilitarBooster();
+    ejecutarBooster();
+    if (waiting){
+      habilitarBooster();
+    }
+    //setTimeout(() => {
+     // habilitarBooster();
+    //}, 10000);
+  }
+
+  function habilitarBooster() {
+    document.getElementById("booster").disabled = false;
+  }
+
+  function deshabilitarBooster() {
+    document.getElementById("booster").disabled = true;
   }
 
   if (grid === null) {

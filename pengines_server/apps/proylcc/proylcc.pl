@@ -1,27 +1,5 @@
 :- module(proylcc, 
 	[  
-        random_potencia/3,
-        potencia_dos/2,
-        posiciones_a_indices/4,
-        sort/2,
-        reemplazar_por_ceros_y_ultimo/5,
-        reemplazar_por_ceros_y_ultimo/6,
-        agregar_suma_ultimo/3,
-        en_columnas/3,
-        en_columnas/4,
-        eliminar_ceros_y_contar/3,
-        completar_con_randoms/3,
-        en_filas/2,
-        sacar_primer_elem/3,
-        eliminando_bloques/3,
-        eliminando_bloques/2,
-        enlistar/3,
-        posiciones_adyacentes/4,
-        posicionValida/2,
-        agrupar/8,
-        colapsar_iguales/4,
-        colapsar_iguales/7,
-        destruir_grupos/3,
 		join/4,
         booster/3
 	]).
@@ -48,6 +26,10 @@
      * Ultimo es el ultimo elemento de la lista Posiciones.
      */ 
         posiciones_a_indices(_,[], [], _).
+        posiciones_a_indices(C,[[X,Y]], [Index], Index) :- Index is (X*C + Y).
+        posiciones_a_indices(C,[[X,Y]|Posiciones], [Index|Indices], Ultimo) :-
+            Index is (X*C + Y),
+            posiciones_a_indices(C, Posiciones, Indices, Ultimo). posiciones_a_indices(_,[], [], _).
         posiciones_a_indices(C,[[X,Y]], [Index], Index) :- Index is (X*C + Y).
         posiciones_a_indices(C,[[X,Y]|Posiciones], [Index|Indices], Ultimo) :-
             Index is (X*C + Y),
@@ -312,14 +294,279 @@
             length(X, Tam),
             Tam > 1,  
             I is Tam-1,
-            nth0(I, X, Ult),
-            sort(X, Xs),
+            sort(X, Xs), %ordena para ubicar el bloque final en la posición más abajo y a la derecha.
+            nth0(I, Xs, Ult),            
             reemplazar_por_ceros_y_ultimo(Ult, Xs, Grilla, R, Suma),
             potencia_dos(Suma, S),
             agregar_suma_ultimo(R,S,R1),
             destruir_grupos(R1, G, Resultado).
         destruir_grupos(Grilla, [_|G], Resultado) :- destruir_grupos(Grilla, G, Resultado).
     
+    %----------------------------------------------------
+/*
+valor_ultimo_bloque(+Grilla,+Col,+Camino,-Result)
+    -Result es el valor de la menor potencia de 2 mayor o igual a la suma de las coordenadas.
+    -Camino es una lista de coordenadas de formato [Fila, Columna]
+*/
+valor_ultimo_bloque(Grilla, Col, Camino, Result):-
+    valor_ultimo_bloque_aux(Grilla, Col, Camino, Suma),
+    menorPotenciaDe2(Suma, Result).
+
+/*
+valor_ultimo_bloque_aux(+Grilla,+Col,+Camino, Result)
+    -Función recursiva auxiliar para calcularPrimero/4
+    -Result es la suma de los valores del camino en la grilla.
+*/
+% Caso Base:
+valor_ultimo_bloque_aux(_,_,[],0).
+% Caso Recursivo:
+valor_ultimo_bloque_aux(Grilla, Col,[PosActual|Resto],Suma):-
+    nth0(PosActual, Grilla, Valor),
+    valor_ultimo_bloque_aux(Grilla,Col,Resto,Suma1),
+    Suma is Valor+Suma1.
+
+%coordenada_a_indice([X,Y], Col, Index) :- Index is (X*Col + Y).
+
+/*
+    valorEnCoordenada(+Grilla, +Col, +Coordenada, -Result)
+        -Result es el velor almacenado en la Coordenada
+*/
+
+ /*
+    visitar(+Coordenada, +Fil, +Col, +Grilla, +ListaVisitados, -Cluster)
+        -Cluster es una lista de coordenadas ady con el mismo valor.
+        -Marca como visitados los nodos a los que se puede mover y los agrega al cluster
+        -NO actualiza la lista de visitados, sino que se debe usar Append a visitados con el Cluster
+        al salir de la sentencia.
+*/
+visitar(Pos, Fil,Col, Grilla, Visitados,[Pos|GrupoN]):-
+    %Lista es una lista de coordenadas ady que se pueden visitar
+    valido_visitar(Grilla, Fil, Col,Visitados,Pos,Lista),
+    visitar_aux(Lista,Fil,Col,Grilla, [Pos|Visitados], [],GrupoN).
+
+
+/*
+    visitar_aux(+ListaCoordenadas, +Fil, +Col, +Grilla, +Visitados, +GrupoActual,GrupoN)
+        - GrupoN es el grupo formado por las coordenadas ady del mismo valor.
+        - Se inicia con GrupoActual vacío.
+*/
+%Caso base la lista a visitar está vacía:
+visitar_aux([],_,_,_,_,Grupo,Grupo).
+
+%Caso Recursivo: el nodo no fue visitado.
+visitar_aux([PosActual|Resto],Fil,Col, Grilla,Visitados,Grupo,[PosActual|GrupoN]):-
+    not(member(PosActual, Visitados)),
+    %Primero Visito la vecindad de la CoordenadaActual y  marco como visitados 
+    valido_visitar(Grilla, Fil, Col,Visitados,PosActual,Lista),
+    visitar_aux(Lista,Fil,Col,Grilla, [PosActual|Visitados], Grupo,GrupoN1),
+    append([PosActual|Visitados],GrupoN1, VisitadosN),
+
+    %Después visito el resto de la lista
+    visitar_aux(Resto,Fil,Col,Grilla,VisitadosN, GrupoN1, GrupoN).
+
+% Caso Recursivo: La coordenada ya fue visitada, sigo visitando las otras.
+visitar_aux([PosActual|Resto],Fil,Col, Grilla,Visitados,Grupo,GrupoN):-
+    member(PosActual, Visitados),
+    visitar_aux(Resto,Fil,Col, Grilla,Visitados,Grupo,GrupoN).
+
+/*
+    valido_visitar(+Grilla, +Fil, +Col, +Visitados, +Coordenada, -Result)
+        -Result es la lista de las coordenadas ady que puedo visitar.
+        -Se evalúa si ya están visitadas, si se encuentran en un borde y si coinciden en el valor.
+*/
+valido_visitar(Grilla, Fil,Col,Visitados,Pos,Result):-
+    %ady([Fila,Columna],Ady), 
+    %valorEnCoordenada(Grilla, Col, [Fila,Columna], Valor),
+    posiciones_ady(Pos,Col, Fil, Ady), 
+    nth0(Pos, Grilla, Valor),
+    findall(
+        P,
+        (
+            member(P,Ady), 
+            valido_visitar_aux(Grilla, Fil, Col, Visitados, P, Valor)
+        ), 
+        Result
+    ).
+
+
+%Devuelve True si La coordenada no está, visitada, si no se encuentra en un borde y si coincide en el valor.
+valido_visitar_aux(Grilla, _, _, Visitados, Pos, Valor):-
+    %coordenadaValida(Fil,Col,Pos),
+    not(member(Pos, Visitados)),
+    %valorEnCoordenada(Grilla, Col, Pos, Valor1),
+    nth0(Pos, Grilla, Valor1),
+    Valor=:=Valor1.
+
+/*
+    seleccionar_grupos(+Lista,NuevaLista)
+        -Si la lista tiene un solo elemento, devuelve la lista vacía.
+        -Se usa porque Clusters() devuelve como seleccionar_grupos las coordenadas que tienen un solo elemento,
+        que no cuentan a la hora de agrupar
+*/
+seleccionar_grupos([_], []).
+seleccionar_grupos([H|T], [H|T]).
+
+
+ /*
+    caminoMax
+*/
+movida_maxima(Grilla, Col, CaminoMax):-
+    /*
+        Paso 1: Consigo la cantidad de Filas:
+    */
+    length(Grilla, Size),
+    Fil is Size/Col,
+
+    caminos_posibles(0, Grilla, Size, Fil, Col, [], Caminos),
+
+    camino_maximo(Grilla,Col,Caminos,CaminoMax1),
+    reverse(CaminoMax1, CaminoMax).
+    
+
+/*
+    clusters(+Grilla, +Fil, +Col, -Grupos)
+        -Grupos es una lista de listas de coordenadas, conteniendo cada uno de los clusters de 
+        ítems iguales.
+*/
+%Caso Base:
+%caminoMax([],_,_,[]).
+
+%Caso Recursivo:
+% caminoMax([X|Xs],Fil, Col, CaminoMax):-
+
+%   caminos_posibles([0,0], [X|Xs],Fil,Col,[], Grupos1),
+%   delete(Grupos1, [], Grupos),
+%   camino_maximo(Grilla, Col,Grupos, CaminoMax).
+
+
+camino_maximo(Grilla, Col, Grupos, CaminoMax) :-
+    valores_caminos(Grilla, Col, Grupos, ValorCaminos),
+    max_list(ValorCaminos, ValorMax),
+    nth0(IndiceMax, ValorCaminos, ValorMax),
+    nth0(IndiceMax, Grupos, CaminoMax).
+    
+valores_caminos(_, _, [], []).
+valores_caminos(Grilla, Col, [Camino|Resto], [Valor|ValorResto]) :-
+    % length(Camino, CantidadCoordenadas),
+    valor_ultimo_bloque_aux(Grilla, Col, Camino, Valor),
+    valores_caminos(Grilla, Col, Resto,ValorResto).
+
+
+/*
+    caminos_posibles(+Coordenada, +Grilla, +Fil, +Col, +Visitados, -Result)
+        -Result es la lista de todos los clusters en la grilla empezando por la coordenada dada.
+        -Mantiene una lista visitados, que actualiza para verificar las siguientes coordenadas.
+*/
+%Caso Base:Pasé por todas las filas.
+caminos_posibles(Tam, _,Tam, _,_,_, []).
+
+%Caso Recursivo: La coordenada no fue visitada y es válida.
+caminos_posibles(Pos,Grilla,Tam,Fil,Col, Visitados, [ClusterLimpio|Result]):-
+    not(member(Pos,Visitados)),
+    %coordenadaValida(Fil, Col,[Fila,Columna]),
+
+    visitar_camino(Pos, Fil,Col,Grilla,Cluster),
+    %El nuevo Cluster se marca como visitado porque todas sus coordenadas ya fueron visitadas.
+    append(Visitados,Cluster,Visitados1),
+    seleccionar_grupos(Cluster, ClusterLimpio), %Si el Cluster es de una sola coordenada, lo dejamos vacío.
+
+    P is (Pos+1),
+    caminos_posibles(P,Grilla,Tam,Fil,Col,Visitados1,Result).
+
+
+% Caso Recursivo: La coordenada es válida pero fue Visitada previamente.
+caminos_posibles(Pos,Grilla,Tam,Fil,Col, Visitados, Result):-
+    member(Pos,Visitados),
+    %coordenadaValida(Fil, Col,[Fila,Columna]),
+    
+    P is (Pos+1),
+    caminos_posibles(P,Grilla,Tam,Fil,Col,Visitados,Result).
+
+% Caso Recursivo: La columna no es válida, empiezo por la siguiente fila.
+%caminos_posibles([Fila,Columna],Grilla,Fil,Col, Visitados, Result):-
+%   not(coordenadaValida(Fil, Col,[Fila,Columna])),
+%   Fila1 is Fila+1,
+%   caminos_posibles([Fila1,0],Grilla,Fil,Col, Visitados, Result).
+
+
+/*
+    visitar_camino(+Coordenada, +Fil, +Col, +Grilla, +ListaVisitados, -Cluster)
+        -Cluster es una lista de coordenadas ady con el mismo valor.
+        -Marca como visitados los nodos a los que se puede mover y los agrega al cluster
+        -NO actualiza la lista de visitados, sino que se debe usar Append a visitados con el Cluster
+        al salir de la sentencia.
+*/
+
+visitar_camino(Pos, Fil,Col,Grilla,Maximo):-
+    %Lista es una lista de coordenadas ady que se pueden visitar
+    valido_visitar(Grilla, Fil, Col,[],Pos,Lista),
+    visitar_camino_aux(Lista,Fil,Col,Grilla,[Pos], [], ColecFinal),
+    camino_maximo(Grilla, Col, ColecFinal, Maximo).
+
+/*
+    visitar_camino_aux(+ListaCoordenadas, +Fil, +Col, +Grilla, +Visitados, +GrupoActual,GrupoN)
+        - GrupoN es el grupo formado por las coordenadas ady del mismo valor.
+        - Se inicia con GrupoActual vacío.
+*/
+%Caso base la lista a visitar está vacía:
+
+visitar_camino_aux([],_,_,_,Grupo,Coleccion,[Grupo|Coleccion]).
+    
+
+
+%Caso Recursivo: el nodo no fue visitado.
+visitar_camino_aux([PosActual|Resto],Fil,Col, Grilla,Grupo,Coleccion, ColecFinal):-
+    not(member(PosActual, Grupo)),
+    %Primero Visito la vecindad de la CoordenadaActual y  marco como visitados 
+    valido_visitar_camino(Grilla, Fil, Col,Grupo,PosActual,Lista),
+    %nth0(PosActual, Grilla, Valor),
+    
+    visitar_camino_aux(Lista,Fil,Col,Grilla, [PosActual|Grupo], Coleccion, ColeccionNueva1),
+    
+    %Después visito el resto de la lista
+    visitar_camino_aux(Resto,Fil,Col,Grilla, Grupo, ColeccionNueva1,ColecFinal).
+
+
+
+% Caso Recursivo: La coordenada ya fue visitada, sigo visitando las otras.
+visitar_camino_aux([PosActual|Resto],Fil,Col, Grilla,Grupo, Coleccion, ColecFinal):-
+    member(PosActual, Grupo),
+    visitar_camino_aux(Resto,Fil,Col, Grilla,Grupo,Coleccion,ColecFinal).
+
+
+
+/*s
+    valido_visitar_camino(+Grilla, +Fil, +Col, +Visitados, +Coordenada, -Result)
+        -Result es la lista de las coordenadas ady que puedo visitar (Para el Proyecto 2).
+        -Se evalúa si ya están visitadas, si se encuentran en un borde y si coinciden en el valor.
+*/
+valido_visitar_camino(Grilla, Fil,Col,Grupo,Pos,Result):-
+    posiciones_ady(Pos,Col, Fil, Ady), 
+    nth0(Pos, Grilla, Valor),
+    findall(
+        P,
+        (
+            member(P,Ady), 
+            valido_visitar_camino_aux(Grilla, Fil, Col, Grupo, P, Valor)
+        ), 
+        Result
+    ).
+
+
+%Devuelve True si La coordenada no está, visitada, si no se encuentra en un borde y si coincide en el valor.
+valido_visitar_camino_aux(Grilla, _, _, Grupo, Pos,Valor):-
+    %coordenadaValida(Fil,Col,[Fila,Columna]),
+    not(member(Pos, Grupo)),
+    %valorEnCoordenada(Grilla, Col, [Fila,Columna], Valor1),
+    nth0(Pos, Grilla, Valor1),
+    (
+        Valor=:=Valor1;
+        (
+            potencia_dos(Valor, Siguiente),
+            Valor1=:=Siguiente
+        )
+    ).
+
     
     /**
      * join(+Grid, +NumOfColumns, +Path, -RGrids) 
@@ -352,3 +599,4 @@
             nth0(I, R, Ult),
             eliminando_bloques(Ult,NumOfColumns, Result),
             append(R, [Result],RGrids).
+
