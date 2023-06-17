@@ -107,3 +107,25 @@ body {
   cursor: pointer;
   border: 4px solid fuchsia;
 }
+
+/* Estilos para el botón */
+#MovidaMaxima {
+  border-radius: 20px;
+  background-color: blue;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: 4px solid fuchsia;
+}
+
+/* Estilos para el botón */
+#MaximoAdyacente {
+  border-radius: 20px;
+  background-color: blue;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: 4px solid fuchsia;
+}

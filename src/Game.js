@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import PengineClient from './PengineClient';
 import Board from './Board';
-import { joinResult } from './util';
-import Square from './Square';
-
+import { joinResult, joinResultAux } from './util';
+import { numberToColor } from './util';
+//import Loading from './Loading';
 let pengine;
 
 function Game() {
@@ -16,16 +16,14 @@ function Game() {
   const [waiting, setWaiting] = useState(false);
   //Si se esta haciendo un path (Se usa para el valor) 
   const [valorPath, setValorPath] = useState(0);
+  const [isActive, setIsActive] = useState(false);
   useEffect(() => {
     // This is executed just once, after the first render.
     PengineClient.init(onServerReady);
   }, []);
 
-
-  useEffect(() => {
-    // This is executed just once, after the first render.
-    PengineClient.init(onServerReady);
-  }, []);
+//Usado para display del path
+const displayValue = isActive ? valorPath : score;
 
   /**
    * Called when the server was successfully initialized
@@ -51,7 +49,11 @@ function Game() {
     }
     setPath(newPath);
     console.log(JSON.stringify(newPath));
+    setIsActive(true); //Cambia el valor en el return
     setValorPath(joinResult(newPath, grid, numOfColumns));
+    if(newPath.length === 0) {
+      setIsActive(false);
+    }
   }
 
   /**
@@ -82,6 +84,7 @@ function Game() {
     const queryS = "join(" + gridS + "," + numOfColumns + "," + pathS + ", RGrids)";
     setValorPath(0);
     setWaiting(true);
+    setIsActive(false);
     pengine.query(queryS, (success, response) => {
       if (success) {
         setScore(score + joinResult(path, grid, numOfColumns));
@@ -98,24 +101,32 @@ function Game() {
    * @param {number[][]} rGrids a sequence of grids.
    */
   function animateEffect(rGrids) {
+    
+   //let time1=time;
     setGrid(rGrids[0]);
     const restRGrids = rGrids.slice(1);
     if (restRGrids.length > 0) {
       setTimeout(() => {
         animateEffect(restRGrids);
-      }, 1000);
+      }, 500);
     } else {
       setWaiting(false);
     }
   }
 
-  function ejecutarBooster(){
+
+  function handleClick() {
+    if (waiting) {
+      return;
+    }
     const gridS = JSON.stringify(grid);
     const queryS = "booster(" + gridS + "," + numOfColumns + ", RGrids)";
-    setValorPath(0);
+
     setWaiting(true);
+    setIsActive(false);
     pengine.query(queryS, (success, response) => {
       if (success) {
+        setScore(score + joinResult(path, grid, numOfColumns));
         setPath([]);
         animateEffect(response['RGrids']);
       } else {
@@ -123,26 +134,51 @@ function Game() {
       }
     });
   }
- 
 
-  function handleClick() {
-    deshabilitarBooster();
-    ejecutarBooster();
-    if (waiting){
-      habilitarBooster();
+  function handleClickMovidaMaxima() {
+    if (waiting) {
+      return;
     }
-    //setTimeout(() => {
-     // habilitarBooster();
-    //}, 10000);
-  }
+    const gridS = JSON.stringify(grid);
+    const queryS = "movida_maxima(" + gridS + "," + numOfColumns + ", RGrids)";
 
-  function habilitarBooster() {
-    document.getElementById("booster").disabled = false;
+    setWaiting(true);
+    setIsActive(false);
+    pengine.query(queryS, (success, response) => {
+      if (success) {
+        
+        setPath(response['RGrids']);
+        console.log(JSON.stringify(response['RGrids']));
+        setIsActive(true); //Cambia el valor en el return
+        setValorPath(joinResult(response['RGrids'], grid, numOfColumns));
+        setWaiting(false);
+      } else {
+        setWaiting(false);
+      }
+    });
   }
+  
+  function handleClickMaximoAdyacente(){
+    if (waiting) {
+      return;
+    }
+    const gridS = JSON.stringify(grid);
+    const queryS = "maximo_adyacente(" + gridS + "," + numOfColumns + ", RGrids)";
 
-  function deshabilitarBooster() {
-    document.getElementById("booster").disabled = true;
-  }
+    setWaiting(true);
+    setIsActive(false);
+    pengine.query(queryS, (success, response) => {
+      if (success) {
+        setPath(response['RGrids']);
+        console.log(JSON.stringify(response['RGrids']));
+        setIsActive(true); //Cambia el valor en el return
+        setValorPath(joinResult(response['RGrids'], grid, numOfColumns));
+        setWaiting(false);
+      } else {
+        setWaiting(false);
+      }
+    });
+  } 
 
   if (grid === null) {
     return null;
@@ -150,13 +186,17 @@ function Game() {
   return (
       <div className="game">
         <div className="header">
-          <div className="score">{score}</div>
-          <Square value={valorPath}/>
-        </div>       
+          <div className={isActive ? 'squareScore active' : 'score'} style={isActive ? { backgroundColor: numberToColor(displayValue) } : {}}>
+              {displayValue}
+        
+          </div>
+        </div>     
       <div>
       
       <body>
         <button id="booster" onClick={handleClick}>BOOSTER</button>
+        <button id="MovidaMaxima" onClick={handleClickMovidaMaxima}>MOVIDA MAXIMA</button>
+        <button id="MaximoAdyacente" onClick={handleClickMaximoAdyacente}>MAXIMO ADYACENTE</button>
       </body>
       
       </div>
