@@ -3,7 +3,7 @@ import PengineClient from './PengineClient';
 import Board from './Board';
 import { joinResult, joinResultAux } from './util';
 import { numberToColor } from './util';
-//import Loading from './Loading';
+import Loading from './Loading';
 let pengine;
 
 function Game() {
@@ -185,6 +185,7 @@ const displayValue = isActive ? valorPath : score;
   }
   return (
       <div className="game">
+          {waiting && <Loading />} 
         <div className="header">
           <div className={isActive ? 'squareScore active' : 'score'} style={isActive ? { backgroundColor: numberToColor(displayValue) } : {}}>
               {displayValue}
