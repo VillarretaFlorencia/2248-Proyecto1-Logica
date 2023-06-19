@@ -48,6 +48,7 @@ const displayValue = isActive ? valorPath : score;
       return;
     }
     setPath(newPath);
+    console.log("hay new path: ",newPath)
     console.log(JSON.stringify(newPath));
     setIsActive(true); //Cambia el valor en el return
     setValorPath(joinResult(newPath, grid, numOfColumns));
@@ -135,6 +136,19 @@ const displayValue = isActive ? valorPath : score;
     });
   }
 
+  function arrayToGrid(grilla){
+    //convierte arreglo de valores en la grilla a arreglo de posiciones en la grilla
+    var grilla_posiciones = [];
+    for (var i=0; i<grilla.length; i++){
+      var fila = Math.trunc(grilla[i]/5);
+      var col = grilla[i] % 5;
+      var pos = [fila, col];
+      grilla_posiciones.push(pos);
+    }
+
+    return grilla_posiciones;
+  }
+
   function handleClickMovidaMaxima() {
     if (waiting) {
       return;
@@ -146,8 +160,10 @@ const displayValue = isActive ? valorPath : score;
     setIsActive(false);
     pengine.query(queryS, (success, response) => {
       if (success) {
-        setPath(response['RGrids']);
-        console.log(JSON.stringify(response['RGrids']));
+        var grilla_posiciones = arrayToGrid(response['RGrids']);
+
+        setPath(grilla_posiciones);
+
         setIsActive(true); //Cambia el valor en el return
         setValorPath(joinResult(response['RGrids'], grid, numOfColumns));
         setWaiting(false);
@@ -163,17 +179,22 @@ const displayValue = isActive ? valorPath : score;
     }
     const gridS = JSON.stringify(grid);
     const queryS = "maximo_adyacente(" + gridS + "," + numOfColumns + ", RGrids)";
-
+    console.log(queryS);
     setWaiting(true);
     setIsActive(false);
     pengine.query(queryS, (success, response) => {
+      //da error aca
       if (success) {
-        setPath(response['RGrids']);
-        console.log(JSON.stringify(response['RGrids']));
+        // Pasa de un arreglo a grilla con la posicion correspondiente a cada elemento de la grilla en el arreglo
+        var grilla_posiciones = arrayToGrid(response['RGrids'])
+
+        setPath(grilla_posiciones);
+        console.log("----",JSON.stringify(response['RGrids']));
         setIsActive(true); //Cambia el valor en el return
         setValorPath(joinResult(response['RGrids'], grid, numOfColumns));
         setWaiting(false);
       } else {
+        console.log("NO");
         setWaiting(false);
       }
     });
