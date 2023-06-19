@@ -146,7 +146,6 @@ const displayValue = isActive ? valorPath : score;
     setIsActive(false);
     pengine.query(queryS, (success, response) => {
       if (success) {
-        
         setPath(response['RGrids']);
         console.log(JSON.stringify(response['RGrids']));
         setIsActive(true); //Cambia el valor en el return

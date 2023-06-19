@@ -402,8 +402,7 @@
         visitar_camino_aux([PosActual|Resto],CantidadFilas,CantidadColumnas, Grilla,Grupo,Coleccion, ColeccionFinal):-
             not(member(PosActual, Grupo)),
 
-            % Analizo los
-            % adyacentes compatibles
+            % Analizo los adyacentes compatibles
             valido_visitar_camino(Grilla, CantidadFilas, CantidadColumnas,Grupo,PosActual,Lista),
 
             % Visito los adyacentes.
@@ -431,36 +430,36 @@
             camino_maximo(Grilla, Col, ColecFinal, Maximo).
     
     /*
-    *visitarTodosCaminos(+Coordenada, +CantidadFilas, +CantidadColumnas, +Grilla, +ListaVisitados, -ColeccionFinal)
+    *visitar_todos_caminos(+Coordenada, +CantidadFilas, +CantidadColumnas, +Grilla, +ListaVisitados, -ColeccionFinal)
     *ColeccionFinal es la lista de todos los caminos posibles desde la coordenada dada.
     *Análogo a visitarCaminos, pero no devuelve el más grande sino una colección de todos.
     *Reusa visitarCaminoAux.
     */
-        visitarTodosCaminos(Pos, CantidadFilas,CantidadColumnas,Grilla,ColeccionFinal):-
+        visitar_todos_caminos(Pos, CantidadFilas,CantidadColumnas,Grilla,ColeccionFinal):-
             valido_visitar(Grilla, CantidadFilas, CantidadColumnas,[],Pos,Lista),
             visitar_camino_aux(Lista,CantidadFilas,CantidadColumnas,Grilla,[Pos], [], ColeccionFinal).
     
     /*
-    *encontrarTodosCaminos(+Coordenada, +Grilla, +CantidadFilas, +CantidadColumnas, -Resultado)
+    *encontrar_todos_caminos(+Coordenada, +Grilla, +CantidadFilas, +CantidadColumnas, -Resultado)
     *Resultado es la lista de todos los caminos posibles.
     *Itera sobre cada coordenada, y encuentra la colección de todos los caminos posibles.
     *Análogo a encontrarCaminos/5, pero no busca el camino mayor por coordenada.
     */
         %Caso Base:Pasé por todas las filas.
-        encontrarTodosCaminos(Tam, _, Tam, _, _, []).
+        encontrar_todos_caminos(Tam, _, Tam, _, _, []).
         %Caso Recursivo: La coordenada no fue visitada y es válida.
-        encontrarTodosCaminos(Pos,Grilla,Tam,CantidadFilas,CantidadColumnas, Res):-
+        encontrar_todos_caminos(Pos,Grilla,Tam,CantidadFilas,CantidadColumnas, Res):-
 
-            visitarTodosCaminos(Pos, CantidadFilas,CantidadColumnas,Grilla,Cluster),
+            visitar_todos_caminos(Pos, CantidadFilas,CantidadColumnas,Grilla,Cluster),
             seleccionar_grupos(Cluster, ClusterLimpio), %Si el Cluster es de una sola coordenada, lo dejamos vacío.
             P is Pos+1,
-            encontrarTodosCaminos(P,Grilla,Tam,CantidadFilas,CantidadColumnas,Resultado),
+            encontrar_todos_caminos(P,Grilla,Tam,CantidadFilas,CantidadColumnas,Resultado),
 
             append(ClusterLimpio, Resultado, Res).
         % Caso Recursivo: La columna no es válida, empiezo por la siguiente fila.
-        encontrarTodosCaminos(Pos,Grilla,Tam,CantidadFilas,CantidadColumnas, Resultado):-
+        encontrar_todos_caminos(Pos,Grilla,Tam,CantidadFilas,CantidadColumnas, Resultado):-
             P is Pos+1,
-            encontrarTodosCaminos(P,Grilla,Tam,CantidadFilas,CantidadColumnas, Resultado).
+            encontrar_todos_caminos(P,Grilla,Tam,CantidadFilas,CantidadColumnas, Resultado).
     
     /*
     *joinVirtual(+Grid, +NumOFColumns, +Path, +RGrid, -CoordenadaNueva)
@@ -479,8 +478,8 @@
             agregar_suma_ultimo(GridEnCero,S,GridReemplazado),
             
             % Aíslo la columna y consigo a qué fila bajaría post-gravedad.
-            conseguirColumna(GridReemplazado, CantidadFilas,NumOfColumns,0, Columna, ColumnaAislada),
-            movimientoCoordenada(ColumnaAislada, Fila, NumeroFilaNuevo),
+            conseguir_columna(GridReemplazado, CantidadFilas,NumOfColumns,0, Columna, ColumnaAislada),
+            movimiento_coordenada(ColumnaAislada, Fila, NumeroFilaNuevo),
             
             posicion_a_indice(NumOfColumns,[NumeroFilaNuevo,Columna],Pos),
             eliminando_bloques(GridReemplazado,NumOfColumns,RGrid),!.
@@ -490,41 +489,41 @@
     *FilaCoordenadaNueva es la fila a la que va a caer la coordenada.
     *Calcula la cantidad de ceros después de la fila, que van a ser la cantidad de movimientos abajo.
     */
-        movimientoCoordenada(Columna, FilaCoordenada, FilaCoordenadaNueva):-
-        cerosDespues(Columna,FilaCoordenada, Ceros),
+        movimiento_coordenada(Columna, FilaCoordenada, FilaCoordenadaNueva):-
+        ceros_despues(Columna,FilaCoordenada, Ceros),
         FilaCoordenadaNueva is FilaCoordenada + Ceros.
     
     /*
-    *cerosDespues(+Columna, +Indice, -Ceros)
+    *ceros_despues(+Columna, +Indice, -Ceros)
     *Ceros es la cantidad de ceros en el arreglo posteriores al índice (indice-0).
     */
         % Caso base: Final de la lista
-        cerosDespues([], _, 0).
+        ceros_despues([], _, 0).
         % Caso Recursivo: Avanzo hasta el índice.
-        cerosDespues([_|Resto], Indice, Ceros) :-
+        ceros_despues([_|Resto], Indice, Ceros) :-
             Indice > 0,
             NuevoIndice is Indice - 1,
-            cerosDespues(Resto, NuevoIndice, Ceros).
+            ceros_despues(Resto, NuevoIndice, Ceros).
         % Casos recursivos: Cuento los ceros.
-        cerosDespues([0|Resto], 0, Ceros) :-
-            cerosDespues(Resto, 0, CerosRestantes),
+        ceros_despues([0|Resto], 0, Ceros) :-
+            ceros_despues(Resto, 0, CerosRestantes),
             Ceros is CerosRestantes + 1.
-        cerosDespues([_|Resto], 0, Ceros) :-
-            cerosDespues(Resto, 0, Ceros).
+        ceros_despues([_|Resto], 0, Ceros) :-
+            ceros_despues(Resto, 0, Ceros).
             
     /*
-    *conseguirColumna(+Grilla, +CantidadFilas , +CantidadColumnas, +NumeroFila, +NumeroColumna, -Columna)
+    *conseguir_columna(+Grilla, +CantidadFilas , +CantidadColumnas, +NumeroFila, +NumeroColumna, -Columna)
     *Columna es la columna aislada en la grilla.
     */
         % Caso Base: Llegué a la ultima fila.
-        conseguirColumna(_, CantidadFilas ,_,NumeroFila, _, []):-
+        conseguir_columna(_, CantidadFilas ,_,NumeroFila, _, []):-
             NumeroFila=:=CantidadFilas.
         % Caso Recursivo: No llegué a la última fila.
-        conseguirColumna(Grilla, CantidadFilas ,CantidadColumnas,NumeroFila, NumeroColumna, [Valor|Columna]):-
+        conseguir_columna(Grilla, CantidadFilas ,CantidadColumnas,NumeroFila, NumeroColumna, [Valor|Columna]):-
             NumeroFila=\=CantidadFilas,
             valor_en_coordenada(Grilla, CantidadColumnas, [NumeroFila, NumeroColumna], Valor),
             NumeroFila1 is NumeroFila+1,
-            conseguirColumna(Grilla,CantidadFilas,CantidadColumnas,NumeroFila1,NumeroColumna,Columna).
+            conseguir_columna(Grilla,CantidadFilas,CantidadColumnas,NumeroFila1,NumeroColumna,Columna).
                 
     
     /*
@@ -536,25 +535,25 @@
             length(Grilla, Size),
             CantidadFilas is Size/CantidadColumnas,
             %Paso 2: Consigo TODOS los caminos posibles (Incluyendo caminos parciales).
-            encontrarTodosCaminos(0, Grilla,Size, CantidadFilas, CantidadColumnas, Caminos),!,
+            encontrar_todos_caminos(0, Grilla,Size, CantidadFilas, CantidadColumnas, Caminos),!,
             max_list(Grilla, ValorMaximo),
             %Paso 3: Consigo el máximo camino que cumpla con la condición.
-            maximo_adyacenteAux(Grilla, CantidadFilas,CantidadColumnas, Caminos,ValorMaximo,[],CaminoMaximo).
+            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Caminos,ValorMaximo,[],CaminoMaximo).
 
     
     /*
-    *maximo_adyacenteAux(+Grilla, +CantidadFilas, +CantidadColumnas, +Caminos, +MaximoActual, -CaminoMaximo)
+    *maximo_adyacente_aux(+Grilla, +CantidadFilas, +CantidadColumnas, +Caminos, +MaximoActual, -CaminoMaximo)
     *CaminoMaximo es el camino más grande que, post-ejecución, cuente con una celda de su mismo valor.
     *Recorre linealmente los caminos y se queda con el que cumpla la condición.
     */
         % Caso Base: Terminé la lista
-        maximo_adyacenteAux(_, _,_, [],_, Actual, Actual):-!.
+        maximo_adyacente_aux(_, _,_, [],_, Actual, Actual):-!.
         
         % Caso Recursivo: El camino actual es más grande que el anterior y cumple con las condiciones.
-        maximo_adyacenteAux(Grilla, CantidadFilas,CantidadColumnas, [Actual|Resto],ValorTecho, MaximoActual, CaminoMaximo):-
+        maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, [Actual|Resto],ValorTecho, MaximoActual, CaminoMaximo):-
             reverse(Actual,CaminoActual),
 
-            % EncontrarTodosCaminos/5 devuelve también caminos de un solo elemento, por lo que los descarto antes.
+            % Encontrar_todos_caminos/5 devuelve también caminos de un solo elemento, por lo que los descarto antes.
             length(CaminoActual,LargoActual),
             LargoActual>1,
             calcular_ultimo(Grilla, CantidadColumnas, CaminoActual, ValorActual),
@@ -571,40 +570,40 @@
             valido_visitar(GrillaProcesada, CantidadFilas,CantidadColumnas,[],PosNueva,Vecinos),
             length(Vecinos,CantidadVecinos),
             (CantidadVecinos=\=0),!,
-            maximo_adyacenteAux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, CaminoActual, CaminoMaximo),!.
+            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, CaminoActual, CaminoMaximo),!.
             
             % Caso Recursivo: Actual es un camino de un solo elemento
-            maximo_adyacenteAux(Grilla, CantidadFilas,CantidadColumnas, [Actual|Resto],ValorTecho, MaximoActual,CaminoMaximo):-
+            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, [Actual|Resto],ValorTecho, MaximoActual,CaminoMaximo):-
             length(Actual,LargoActual),
             not(LargoActual>1),!,
-            maximo_adyacenteAux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo),!.
+            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo),!.
     
     % Caso recursivo: El valor de Actual es menor o igual que el maximo anterior
     % o es mayor que la celda más grande de la grilla.
-        maximo_adyacenteAux(Grilla, CantidadFilas,CantidadColumnas, [CaminoActual|Resto],ValorTecho, MaximoActual,CaminoMaximo):-
+        maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, [CaminoActual|Resto],ValorTecho, MaximoActual,CaminoMaximo):-
             calcular_ultimo(Grilla, CantidadColumnas, CaminoActual, ValorActual),
             calcular_ultimo(Grilla, CantidadColumnas, MaximoActual, ValorMaximoActual),
             (not(ValorActual=<ValorTecho) ; not(ValorActual>ValorMaximoActual)),
-            maximo_adyacenteAux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo),!.
+            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo),!.
         
         % Caso recursivo: El camino actual no tiene vecinos post-ejecución.
-        maximo_adyacenteAux(Grilla, CantidadFilas,CantidadColumnas, [Actual|Resto], ValorTecho,MaximoActual,CaminoMaximo):-
+        maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, [Actual|Resto], ValorTecho,MaximoActual,CaminoMaximo):-
             reverse(Actual,CaminoActual),
             joinVirtual(Grilla, CantidadColumnas, CaminoActual, GrillaProcesada, PosNueva),
             valido_visitar(GrillaProcesada, CantidadFilas,CantidadColumnas,[],PosNueva,Vecinos),
             length(Vecinos,CantidadVecinos),
             not(CantidadVecinos=\=0),
-            maximo_adyacenteAux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo),!.
+            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo),!.
                 
     /*
     *caminos_posibles(+Coordenada, +Grilla, +Tamanio, +Fil, +Col, +Visitados, -Result)
     *Result es la lista de todos los clusters en la grilla empezando por la coordenada dada.
     *Mantiene una lista visitados, que actualiza para verificar las siguientes coordenadas.
     */
-    %Caso Base:Pase por todas las filas.
+        %Caso Base:Pase por todas las filas.
         caminos_posibles(Tam, _,Tam, _,_,_, []).
 
-    %Caso Recursivo: La coordenada no fue visitada y es válida.
+        %Caso Recursivo: La coordenada no fue visitada y es válida.
         caminos_posibles(Pos,Grilla,Tam,Fil,Col, Visitados, [ClusterLimpio|Result]):-
             not(member(Pos,Visitados)),
             visitar_camino(Pos, Fil,Col,Grilla,Cluster),
