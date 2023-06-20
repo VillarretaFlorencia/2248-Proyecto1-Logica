@@ -79,11 +79,12 @@
             Index is (X*C + Y),
             posiciones_a_indices(C, Posiciones, Indices, Ultimo).
 
-    /** CAMBIAAAAAAAAAAAAAAAAAAAAAR
-     * posiciones_a_indices(+C, +Posiciones, -Indices, -Ultimo).
-     * C es la cantidad de Columnas, Posiciones es una lista de posiciones [X,Y],
-     * Indices es la lista de salida que contiene las posiciones convertidas a indices,
-     * Ultimo es el ultimo elemento de la lista Posiciones.
+    /** 
+     * indices_a_posiciones(+C, +Indices, -Posiciones, -Ultimo).
+     * C es la cantidad de Columnas, 
+     * Indices es la lista de entrada que contiene las posiciones
+     * Posiciones es una lista de posiciones [X,Y],
+     * Ultimo es el ultimo elemento de la lista.
      */
     indices_a_posiciones(_,[], [], _).
     indices_a_posiciones(Col,[I], [[X,Y]], [X,Y]) :- 
