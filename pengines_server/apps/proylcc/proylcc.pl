@@ -78,6 +78,23 @@
         posiciones_a_indices(C,[[X,Y]|Posiciones], [Index|Indices], Ultimo) :-
             Index is (X*C + Y),
             posiciones_a_indices(C, Posiciones, Indices, Ultimo).
+
+    /** CAMBIAAAAAAAAAAAAAAAAAAAAAR
+     * posiciones_a_indices(+C, +Posiciones, -Indices, -Ultimo).
+     * C es la cantidad de Columnas, Posiciones es una lista de posiciones [X,Y],
+     * Indices es la lista de salida que contiene las posiciones convertidas a indices,
+     * Ultimo es el ultimo elemento de la lista Posiciones.
+     */
+    indices_a_posiciones(_,[], [], _).
+    indices_a_posiciones(Col,[I], [[X,Y]], [X,Y]) :- 
+        X is I // Col,
+        Y is I - (X * Col).
+    indices_a_posiciones(Col,[I|Indices], [[X,Y]|Posiciones], Ultimo) :-
+        X is I // Col,
+        Y is I - (X * Col),
+        indices_a_posiciones(Col, Indices, Posiciones, Ultimo).
+
+
     /**
      * reemplazar_por_ceros_y_ultimo(+U, +P, +L, -Result, +Index, -S)
      * U es el ultimo elemento de la lista P.
@@ -530,7 +547,7 @@
     *maximo_adyacente(+Grilla, +CantidadColumnas, -CaminoMaximo)
     *CaminoMaximo es el camino más grande que termina, post-ejecución, con una celda adyacente del mismo valor que el resultado.
     */
-        maximo_adyacente(Grilla, CantidadColumnas, CaminoMaximo):-
+        maximo_adyacente(Grilla, CantidadColumnas, CM):-
             %Paso 1: Consigo la cantidad de Filas
             length(Grilla, Size),
             CantidadFilas is Size/CantidadColumnas,
@@ -538,7 +555,9 @@
             encontrar_todos_caminos(0, Grilla,Size, CantidadFilas, CantidadColumnas, Caminos),!,
             max_list(Grilla, ValorMaximo),
             %Paso 3: Consigo el máximo camino que cumpla con la condición.
-            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Caminos,ValorMaximo,[],CaminoMaximo).
+            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Caminos,ValorMaximo,[],CaminoMaximo),
+            indices_a_posiciones(CantidadColumnas, CaminoMaximo, CM, _).
+
 
     
     /*
@@ -681,7 +700,7 @@
     *Genera todos los caminos posibles en la grilla.
     *Encuentra el camino máximo entre esos caminos y devuelve el camino máximo en el orden correcto.
     */
-        movida_maxima(Grilla, Col, CaminoMax):-
+        movida_maxima(Grilla, Col, CM):-
             %Paso 1: Consigo la cantidad de Filas:
             length(Grilla, Size),
             Fil is Size/Col,
@@ -689,4 +708,5 @@
             caminos_posibles(0, Grilla, Size, Fil, Col, [], Caminos),
 
             camino_maximo(Grilla,Col,Caminos,CaminoMax1),
-            reverse(CaminoMax1, CaminoMax).
+            reverse(CaminoMax1, CaminoMax), 
+            indices_a_posiciones(Col, CaminoMax, CM, _).
