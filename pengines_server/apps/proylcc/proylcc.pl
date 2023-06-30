@@ -437,16 +437,20 @@
        
     /*
     *visitar_camino(+Coordenada, +Fil, +Col, +Grilla, -ListaVisitados)
-    *Marca como visitados los nodos a los que se puede mover y los agrega al cluster
-    *NO actualiza la lista de visitados, sino que se debe usar Append a visitados con el Cluster
+    *Marca como visitados los nodos a los que se puede mover y los agrega al camino
+    *NO actualiza la lista de visitados, sino que se debe usar Append a visitados con el camino
     *al salir de la sentencia.
     */
+    %TODO sacar camino_maximo (este chequeo deberia hacerse afuera del predicado)
+
         visitar_camino(Pos, Fil,Col,Grilla,Maximo):-
             %Lista es una lista de coordenadas adyacentes que se pueden visitar
             valido_visitar(Grilla, Fil, Col,[],Pos,Lista),
             visitar_camino_aux(Lista,Fil,Col,Grilla,[Pos], [], ColecFinal),
             camino_maximo(Grilla, Col, ColecFinal, Maximo).
     
+
+    %TODO eliminar este predicado
     /*
     *visitar_todos_caminos(+Coordenada, +CantidadFilas, +CantidadColumnas, +Grilla, +ListaVisitados, -ColeccionFinal)
     *ColeccionFinal es la lista de todos los caminos posibles desde la coordenada dada.
@@ -457,7 +461,7 @@
             valido_visitar(Grilla, CantidadFilas, CantidadColumnas,[],Pos,Lista),
             visitar_camino_aux(Lista,CantidadFilas,CantidadColumnas,Grilla,[Pos], [], ColeccionFinal).
     
-    /*
+    /*Cma
     *encontrar_todos_caminos(+Coordenada, +Grilla, +CantidadFilas, +CantidadColumnas, -Resultado)
     *Resultado es la lista de todos los caminos posibles.
     *Itera sobre cada coordenada, y encuentra la colección de todos los caminos posibles.
@@ -469,7 +473,8 @@
         encontrar_todos_caminos(Pos,Grilla,Tam,CantidadFilas,CantidadColumnas, Res):-
 
             visitar_todos_caminos(Pos, CantidadFilas,CantidadColumnas,Grilla,Cluster),
-            seleccionar_grupos(Cluster, ClusterLimpio), %Si el Cluster es de una sola coordenada, lo dejamos vacío.
+            %Si el Cluster es de una sola coordenada, lo dejamos vacío.
+            seleccionar_grupos(Cluster, ClusterLimpio), 
             P is Pos+1,
             encontrar_todos_caminos(P,Grilla,Tam,CantidadFilas,CantidadColumnas,Resultado),
 
@@ -500,7 +505,7 @@
             movimiento_coordenada(ColumnaAislada, Fila, NumeroFilaNuevo),
             
             posicion_a_indice(NumOfColumns,[NumeroFilaNuevo,Columna],Pos),
-            eliminando_bloques(GridReemplazado,NumOfColumns,RGrid),!.
+            eliminando_bloques(GridReemplazado,NumOfColumns,RGrid).
     
     /*
     *movimientoCoordenada(+Columna, +FilaCoordenada, -FilaCoordenadaNueva)
@@ -554,7 +559,14 @@
             CantidadFilas is Size/CantidadColumnas,
             %Paso 2: Consigo TODOS los caminos posibles (Incluyendo caminos parciales).
             encontrar_todos_caminos(0, Grilla,Size, CantidadFilas, CantidadColumnas, Caminos),!,
+            %TODO una vez que obtuve todos los caminos debo hacer una lista filtrada, donde chequeo la gravedad y la adyacencia
+            %check_gravity(_,_,_, CaminosFiltrados).
+            %TODO
+            %Es una buena optimizacion pero a priori no hace falta para que funcione (haganlo andar sin esto, y despues lo pueden agregar)
             max_list(Grilla, ValorMaximo),
+
+            %TODO si maximo_adyacente y movida_maxima difieren unicamente por maximo_adyacente_aux(chequear que sea asi) entonces el problema tiene que estar en 
+            %maximo_adyacente_aux
             %Paso 3: Consigo el máximo camino que cumpla con la condición.
             maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Caminos,ValorMaximo,[],CaminoMaximo),
             indices_a_posiciones(CantidadColumnas, CaminoMaximo, CM, _).
@@ -567,13 +579,14 @@
     *Recorre linealmente los caminos y se queda con el que cumpla la condición.
     */
         % Caso Base: Terminé la lista
-        maximo_adyacente_aux(_, _,_, [],_, Actual, Actual):-!.
+        maximo_adyacente_aux(_, _,_, [],_, Actual, Actual).
         
         % Caso Recursivo: El camino actual es más grande que el anterior y cumple con las condiciones.
         maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, [Actual|Resto],ValorTecho, MaximoActual, CaminoMaximo):-
             reverse(Actual,CaminoActual),
 
             % Encontrar_todos_caminos/5 devuelve también caminos de un solo elemento, por lo que los descarto antes.
+            %tODO Hace falta? chequear si encontrar_caminos usa seleccionaR_grupos
             length(CaminoActual,LargoActual),
             LargoActual>1,
             calcular_ultimo(Grilla, CantidadColumnas, CaminoActual, ValorActual),
@@ -581,6 +594,8 @@
 
             % Verifico que el Valor actual no se más grande que el techo y que actual sea más grande
             % que el camino máximo anterior
+
+            %TODO estas optimizaciones estan bien pero no son necesarias para que annde el algoritmo
             ValorActual=<ValorTecho,
             ValorActual>ValorMaximoActual,
             
@@ -589,14 +604,15 @@
             % Verifico que tenga adyacentes.
             valido_visitar(GrillaProcesada, CantidadFilas,CantidadColumnas,[],PosNueva,Vecinos),
             length(Vecinos,CantidadVecinos),
-            (CantidadVecinos=\=0),!,
-            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, CaminoActual, CaminoMaximo),!.
+            (CantidadVecinos=\=0),
+            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, CaminoActual, CaminoMaximo).
             
-            % Caso Recursivo: Actual es un camino de un solo elemento
-            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, [Actual|Resto],ValorTecho, MaximoActual,CaminoMaximo):-
+        %TODO este caso se puede eliminar
+        % Caso Recursivo: Actual es un camino de un solo elemento
+        maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, [Actual|Resto],ValorTecho, MaximoActual,CaminoMaximo):-
             length(Actual,LargoActual),
-            not(LargoActual>1),!,
-            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo),!.
+            not(LargoActual>1),
+            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo).
     
     % Caso recursivo: El valor de Actual es menor o igual que el maximo anterior
     % o es mayor que la celda más grande de la grilla.
@@ -604,7 +620,7 @@
             calcular_ultimo(Grilla, CantidadColumnas, CaminoActual, ValorActual),
             calcular_ultimo(Grilla, CantidadColumnas, MaximoActual, ValorMaximoActual),
             (not(ValorActual=<ValorTecho) ; not(ValorActual>ValorMaximoActual)),
-            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo),!.
+            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo).
         
         % Caso recursivo: El camino actual no tiene vecinos post-ejecución.
         maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, [Actual|Resto], ValorTecho,MaximoActual,CaminoMaximo):-
@@ -613,11 +629,11 @@
             valido_visitar(GrillaProcesada, CantidadFilas,CantidadColumnas,[],PosNueva,Vecinos),
             length(Vecinos,CantidadVecinos),
             not(CantidadVecinos=\=0),
-            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo),!.
+            maximo_adyacente_aux(Grilla, CantidadFilas,CantidadColumnas, Resto,ValorTecho, MaximoActual, CaminoMaximo).
                 
     /*
     *caminos_posibles(+Coordenada, +Grilla, +Tamanio, +Fil, +Col, +Visitados, -Result)
-    *Result es la lista de todos los clusters en la grilla empezando por la coordenada dada.
+    *Result es la lista de todos los camino en la grilla empezando por la coordenada dada.
     *Mantiene una lista visitados, que actualiza para verificar las siguientes coordenadas.
     */
         %Caso Base:Pase por todas las filas.
@@ -626,9 +642,14 @@
         %Caso Recursivo: La coordenada no fue visitada y es válida.
         caminos_posibles(Pos,Grilla,Tam,Fil,Col, Visitados, [ClusterLimpio|Result]):-
             not(member(Pos,Visitados)),
+            %caminos que arrancan en POS. Cluster deberia ser el conjunto de caminos
             visitar_camino(Pos, Fil,Col,Grilla,Cluster),
+            %TODO hacer chequeo de camino maximo aca
+
             %El nuevo Cluster se marca como visitado porque todas sus coordenadas ya fueron visitadas.
+            %ES necesaria esta lista de visitados?
             append(Visitados,Cluster,Visitados1),
+
             seleccionar_grupos(Cluster, ClusterLimpio), %Si el Cluster es de una sola coordenada, lo dejamos vacío.
 
             P is (Pos+1),
