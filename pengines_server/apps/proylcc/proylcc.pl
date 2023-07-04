@@ -111,11 +111,11 @@
 *Calcula los valores de los caminos para cada grupo en la grilla.
 *Encuentra el valor máximo.
 */	
-camino_maximo(Grilla, Grupos, CaminoMax) :-
-    valores_caminos(Grilla, Grupos, ValorCaminos),
-    max_list(ValorCaminos, ValorMax),
-    nth0(IndiceMax, ValorCaminos, ValorMax),
-    nth0(IndiceMax, Grupos, CaminoMax).
+    camino_maximo(Grilla, Grupos, CaminoMax) :-
+        valores_caminos(Grilla, Grupos, ValorCaminos),
+        max_list(ValorCaminos, ValorMax),
+        nth0(IndiceMax, ValorCaminos, ValorMax),
+        nth0(IndiceMax, Grupos, CaminoMax).
 
 /*
 * posiciones_a_indices(+C, +Posiciones, -Indices, -Ultimo).
@@ -754,6 +754,6 @@ movida_maxima(Grilla, Col, CM):-
         max_list(Grilla, MaximoEnGrilla),
         encontrar_todos_caminos(0, Grilla, Tam, MaximoEnGrilla, CantidadFilas, CantidadColumnas, Caminos),
         list_to_set(Caminos,C),
-        camino_maximo(Grilla, C, CamMax), 
-        reverse(CaminoMaximo, CamMax),
+        camino_maximo(Grilla, C, CamMaximo), 
+        reverse(CamMaximo, CamMax),
         indices_a_posiciones(CantidadColumnas, CamMax, CM, _).
